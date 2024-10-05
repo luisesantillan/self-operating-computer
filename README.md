@@ -37,13 +37,20 @@ https://github.com/OthersideAI/self-operating-computer/assets/42594239/9e8abc96-
 
 ## Run `Self-Operating Computer`
 
-1. **Install the project**
+1. **Install virtualenv**
 ```
-pip install self-operating-computer
+pip install virtualenv
 ```
-2. **Run the project**
+1. **Clone the project and create a Virtual Environment**
 ```
-operate
+git clone https://github.com/luisesantillan/self-operating-computer.git
+cd self-operating-computer && virtualenv sop
+
+```
+2. **Install the dependencies in the Virtual Environment**
+```
+sop\Scripts\activate
+pip install -r requirements.txt
 ```
 3. **Enter your OpenAI Key**: If you don't have one, you can obtain an OpenAI key [here](https://platform.openai.com/account/api-keys)
 
@@ -51,12 +58,14 @@ operate
   <img src="https://github.com/OthersideAI/self-operating-computer/blob/main/readme/key.png" width="300"  style="margin: 10px;"/>
 </div>
 
-4. **Give Terminal app the required permissions**: As a last step, the Terminal app will ask for permission for "Screen Recording" and "Accessibility" in the "Security & Privacy" page of Mac's "System Preferences".
-
-<div align="center">
-  <img src="https://github.com/OthersideAI/self-operating-computer/blob/main/readme/terminal-access-1.png" width="300"  style="margin: 10px;"/>
-  <img src="https://github.com/OthersideAI/self-operating-computer/blob/main/readme/terminal-access-2.png" width="300"  style="margin: 10px;"/>
-</div>
+4. **Install the project**
+```
+pip install .
+```
+5. **Start the self operating computer**
+```
+operate
+```
 
 ## Using `operate` Modes
 
@@ -66,6 +75,11 @@ An additional model is now compatible with the Self Operating Computer Framework
 Start `operate` with the Gemini model
 ```
 operate -m gemini-pro-vision
+```
+
+Or run `operate` with the gpt-4o-mini model
+```
+operate -m gpt-4o-mini
 ```
 
 **Enter your Google AI Studio API key when terminal prompts you for it** If you don't have one, you can obtain a key [here](https://makersuite.google.com/app/apikey) after setting up your Google AI Studio account. You may also need [authorize credentials for a desktop application](https://ai.google.dev/palm_docs/oauth_quickstart). It took me a bit of time to get it working, if anyone knows a simpler way, please make a PR.
