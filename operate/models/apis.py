@@ -42,6 +42,8 @@ async def get_next_action(model, messages, objective, session_id):
         print("[Self-Operating Computer][get_next_action] model", model)
     if model == "gpt-4":
         return call_gpt_4o(messages), None
+    if model == "gpt-4o-mini":
+        return call_gpt_4o_mini(messages), None
     if model == "gpt-4-with-som":
         operation = await call_gpt_4o_labeled(messages, objective, model)
         return operation, None
@@ -59,6 +61,85 @@ async def get_next_action(model, messages, objective, session_id):
         operation = await call_claude_3_with_ocr(messages, objective, model)
         return operation, None
     raise ModelNotRecognizedException(model)
+
+
+def call_gpt_4o_mini(messages):
+    if config.verbose:
+        print("[call_gpt_4_v]")
+    time.sleep(1)
+    client = config.initialize_openai()
+    try:
+        screenshots_dir = "screenshots"
+        if not os.path.exists(screenshots_dir):
+            os.makedirs(screenshots_dir)
+
+        screenshot_filename = os.path.join(screenshots_dir, "screenshot.png")
+        # Call the function to capture the screen with the cursor
+        capture_screen_with_cursor(screenshot_filename)
+
+        with open(screenshot_filename, "rb") as img_file:
+            img_base64 = base64.b64encode(img_file.read()).decode("utf-8")
+
+        if len(messages) == 1:
+            user_prompt = get_user_first_message_prompt()
+        else:
+            user_prompt = get_user_prompt()
+
+        if config.verbose:
+            print(
+                "[call_gpt_4_v] user_prompt",
+                user_prompt,
+            )
+
+        vision_message = {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": user_prompt},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{img_base64}"},
+                },
+            ],
+        }
+        messages.append(vision_message)
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            presence_penalty=1,
+            frequency_penalty=1,
+            temperature=0.7,
+            max_tokens=3000,
+        )
+
+        content = response.choices[0].message.content
+
+        content = clean_json(content)
+
+        assistant_message = {"role": "assistant", "content": content}
+        if config.verbose:
+            print(
+                "[call_gpt_4_v] content",
+                content,
+            )
+        content = json.loads(content)
+
+        messages.append(assistant_message)
+
+        return content
+
+    except Exception as e:
+        print(
+            f"{ANSI_GREEN}[Self-Operating Computer]{ANSI_BRIGHT_MAGENTA}[Operate] That did not work. Trying again {ANSI_RESET}",
+            e,
+        )
+        print(
+            f"{ANSI_GREEN}[Self-Operating Computer]{ANSI_RED}[Error] AI response was {ANSI_RESET}",
+            content,
+        )
+        if config.verbose:
+            traceback.print_exc()
+        return call_gpt_4o(messages)
 
 
 def call_gpt_4o(messages):
